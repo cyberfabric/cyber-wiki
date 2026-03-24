@@ -1,0 +1,9 @@
+# Cypilot artifacts registry
+
+[[systems]]
+name = "CyberWiki"
+slug = "cyberwiki"
+kit = "sdlc"
+artifacts = []
+codebase = []
+children = []
