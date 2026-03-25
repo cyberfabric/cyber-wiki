@@ -419,7 +419,7 @@ The system **MUST** support configurable schema validators (e.g., JSON Schema, R
 
 - [ ] `p2` - **ID**: `cpt-cyberwiki-fr-custom-validators`
 
-The system **MUST** support pluggable custom validators (e.g., CTI-specific rules) that can be configured per space and that block or warn on save when triggered.
+The system **MUST** support pluggable custom validators (e.g., CTI-specific rules, GTS-specific rules) that can be configured per space and that block or warn on save when triggered.
 
 **Rationale**: Domain-specific teams (e.g., Cyber Threat Intelligence) have validation requirements that no generic validator can address; a plugin interface future-proofs the platform for these use cases.
 
