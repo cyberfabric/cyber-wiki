@@ -45,7 +45,7 @@
 
 ### 1.1 Purpose
 
-Cyber Wiki is a Git-native documentation and collaboration platform that brings a GitHub-like experience to engineering teams who need more than a code host — structured doc authoring, rich previews, context-aware commenting, smart validation, and deep integrations with project-tracking tools. It treats Git as the single source of truth while removing the barriers that prevent non-engineers from participating in documentation workflows.
+Cyber Wiki is a Git-native documentation and collaboration platform that brings a GitHub-like experience to engineering teams who need more than a code host — structured doc authoring, rich previews, context-aware commenting, semantic search, smart validation, and deep integrations with project-tracking tools. It treats Git as the single source of truth while removing the barriers that prevent non-engineers from participating in documentation workflows.
 
 The platform bridges the gap between raw Git tooling and heavyweight wiki/knowledge-base products: it is fast, version-controlled, validation-aware, and extensible.
 
