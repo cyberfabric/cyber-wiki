@@ -2,42 +2,98 @@
 
 ## Table of Contents
 
-1. [1. Overview](#1-overview)
-   - [1.1 Purpose](#11-purpose)
-   - [1.2 Background / Problem Statement](#12-background--problem-statement)
-   - [1.3 Goals (Business Outcomes)](#13-goals-business-outcomes)
-   - [1.4 Glossary](#14-glossary)
-2. [2. Actors](#2-actors)
-   - [2.1 Human Actors](#21-human-actors)
-   - [2.2 System Actors](#22-system-actors)
-3. [3. Operational Concept & Environment](#3-operational-concept--environment)
-   - [3.1 Module-Specific Environment Constraints](#31-module-specific-environment-constraints)
-4. [4. Scope](#4-scope)
-   - [4.1 In Scope](#41-in-scope)
-   - [4.2 Out of Scope](#42-out-of-scope)
-5. [5. Functional Requirements](#5-functional-requirements)
-   - [5.1 Repository & Space Navigation](#51-repository--space-navigation)
-   - [5.2 Live Document Editing](#52-live-document-editing)
-   - [5.3 Contextual Inline Comments](#53-contextual-inline-comments)
-   - [5.4 Change Review Workflow](#54-change-review-workflow)
-   - [5.5 Rich Content Previews](#55-rich-content-previews)
-   - [5.6 Document Validation](#56-document-validation)
-   - [5.7 Git Synchronisation](#57-git-synchronisation)
-   - [5.8 Search](#58-search)
-   - [5.9 JIRA Integration](#59-jira-integration)
-   - [5.10 Access Control](#510-access-control)
-6. [6. Non-Functional Requirements](#6-non-functional-requirements)
-   - [6.1 Module-Specific NFRs](#61-module-specific-nfrs)
-   - [6.2 NFR Exclusions](#62-nfr-exclusions)
-7. [7. Public Library Interfaces](#7-public-library-interfaces)
-   - [7.1 Public API Surface](#71-public-api-surface)
-   - [7.2 External Integration Contracts](#72-external-integration-contracts)
-8. [8. Use Cases](#8-use-cases)
-9. [9. Acceptance Criteria](#9-acceptance-criteria)
-10. [10. Dependencies](#10-dependencies)
-11. [11. Assumptions](#11-assumptions)
-12. [12. Risks](#12-risks)
-13. [13. Open Questions](#13-open-questions)
+- [PRD — Cyber Wiki](#prd--cyber-wiki)
+  - [Table of Contents](#table-of-contents)
+  - [1. Overview](#1-overview)
+    - [1.1 Purpose](#11-purpose)
+    - [1.2 Background / Problem Statement](#12-background--problem-statement)
+    - [1.3 Goals (Business Outcomes)](#13-goals-business-outcomes)
+    - [1.4 Glossary](#14-glossary)
+  - [2. Actors](#2-actors)
+    - [2.1 Human Actors](#21-human-actors)
+      - [Admin](#admin)
+      - [Editor](#editor)
+      - [Commenter](#commenter)
+      - [Viewer](#viewer)
+    - [2.2 System Actors](#22-system-actors)
+      - [Git Repository](#git-repository)
+      - [JIRA Instance](#jira-instance)
+      - [CI / Automation Pipeline](#ci--automation-pipeline)
+  - [3. Operational Concept \& Environment](#3-operational-concept--environment)
+    - [3.1 Module-Specific Environment Constraints](#31-module-specific-environment-constraints)
+  - [4. Scope](#4-scope)
+    - [4.1 In Scope](#41-in-scope)
+    - [4.2 Out of Scope](#42-out-of-scope)
+  - [5. Functional Requirements](#5-functional-requirements)
+    - [5.1 Repository \& Space Navigation](#51-repository--space-navigation)
+      - [Browse Repositories and Spaces](#browse-repositories-and-spaces)
+      - [Single-Repo Entry Page](#single-repo-entry-page)
+    - [5.2 Live Document Editing](#52-live-document-editing)
+      - [In-Browser Editing with Live Preview](#in-browser-editing-with-live-preview)
+      - [Standard Formatting Controls and Rendering](#standard-formatting-controls-and-rendering)
+      - [Date Insertion via `//` Shortcut](#date-insertion-via--shortcut)
+      - [Date Badge Rendering in All Views](#date-badge-rendering-in-all-views)
+      - [User Search and Tagging via `@` Shortcut](#user-search-and-tagging-via--shortcut)
+      - [Mention and Task Discovery from Synced Markdown](#mention-and-task-discovery-from-synced-markdown)
+      - [Mention Entity Storage and Badge Rendering](#mention-entity-storage-and-badge-rendering)
+      - [Mention Index for Tagged Users](#mention-index-for-tagged-users)
+      - [Task Extraction from Checkbox Lines with Mentions and Dates](#task-extraction-from-checkbox-lines-with-mentions-and-dates)
+      - [Task Dashboard by Assignee and Deadline](#task-dashboard-by-assignee-and-deadline)
+      - [User-Configurable Mention Notifications](#user-configurable-mention-notifications)
+      - [Admin-Configurable Default Notification Channels](#admin-configurable-default-notification-channels)
+      - [Smart Editing: Newly Typed Text Highlighting](#smart-editing-newly-typed-text-highlighting)
+      - [Smart Editing: AI Refinement of Typed Text](#smart-editing-ai-refinement-of-typed-text)
+      - [Inline Pending Changes Visibility](#inline-pending-changes-visibility)
+      - [Save to Fork and Commit to Main](#save-to-fork-and-commit-to-main)
+    - [5.3 Contextual Inline Comments](#53-contextual-inline-comments)
+      - [Anchor Comments to Line Ranges](#anchor-comments-to-line-ranges)
+      - [Comments Survive Content Changes](#comments-survive-content-changes)
+      - [Threaded Comment Replies](#threaded-comment-replies)
+      - [Comment Storage](#comment-storage)
+    - [5.4 Change Review Workflow](#54-change-review-workflow)
+      - [Propose Pending Changes](#propose-pending-changes)
+      - [Approve and Reject Changes](#approve-and-reject-changes)
+      - [Immutable Change History](#immutable-change-history)
+    - [5.5 Rich Content Previews](#55-rich-content-previews)
+      - [Markdown Rendering](#markdown-rendering)
+      - [Sequence and Mermaid Diagram Previews](#sequence-and-mermaid-diagram-previews)
+      - [draw.io Diagram Previews](#drawio-diagram-previews)
+      - [Table Rendering](#table-rendering)
+      - [Extensible Visual Elements](#extensible-visual-elements)
+    - [5.6 Document Validation](#56-document-validation)
+      - [Link Checker](#link-checker)
+      - [Schema Validation](#schema-validation)
+      - [Custom / Domain-Specific Validators](#custom--domain-specific-validators)
+    - [5.7 Git Synchronisation](#57-git-synchronisation)
+      - [Bidirectional Sync](#bidirectional-sync)
+      - [Conflict Detection](#conflict-detection)
+    - [5.8 Search](#58-search)
+      - [Full-Text Search](#full-text-search)
+      - [Semantic (AI-Powered) Search](#semantic-ai-powered-search)
+    - [5.9 JIRA Integration](#59-jira-integration)
+      - [Inline JIRA Issue Badges](#inline-jira-issue-badges)
+      - [JIRA Issue Views (Grid, Chart, Gantt)](#jira-issue-views-grid-chart-gantt)
+      - [JIRA Issue Search](#jira-issue-search)
+    - [5.10 Access Control](#510-access-control)
+      - [User Authentication](#user-authentication)
+  - [6. Non-Functional Requirements](#6-non-functional-requirements)
+    - [6.1 Module-Specific NFRs](#61-module-specific-nfrs)
+      - [Search Response Time](#search-response-time)
+      - [Document Save Latency](#document-save-latency)
+      - [Availability](#availability)
+      - [Recovery Objectives](#recovery-objectives)
+      - [User Experience Goals](#user-experience-goals)
+    - [6.2 NFR Exclusions](#62-nfr-exclusions)
+  - [7. Public Library Interfaces](#7-public-library-interfaces)
+    - [7.1 Public API Surface](#71-public-api-surface)
+    - [7.2 External Integration Contracts](#72-external-integration-contracts)
+  - [8. Use Cases](#8-use-cases)
+    - [Edit and Commit a Document](#edit-and-commit-a-document)
+  - [9. Acceptance Criteria](#9-acceptance-criteria)
+  - [10. Dependencies](#10-dependencies)
+  - [11. Assumptions](#11-assumptions)
+  - [12. Risks](#12-risks)
+  - [13. Open Questions](#13-open-questions)
 
 ---
 
@@ -257,6 +313,141 @@ The system **MUST** support a configurable "entry page" mode where the platform 
 The system **MUST** allow Editors to edit document content directly in the browser with a live preview rendered alongside or in place of the raw text.
 
 **Rationale**: Eliminates the need for a local Git client or local Markdown renderer, reducing contribution friction to zero for engineers and non-engineers alike.
+
+**Actors**: `cpt-cyberwiki-actor-editor`
+
+#### Standard Formatting Controls and Rendering
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-standard-formatting`
+
+The system **MUST** support standard text formatting in edit and view modes, including at minimum bold, italic, strikethrough, inline code, headings, lists, blockquotes, and links. Formatting **MUST** be preserved and rendered consistently between editor preview and read-only document view.
+
+**Rationale**: Rich-but-standard formatting is required for readable technical documentation and parity with author expectations from modern knowledge tools.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-viewer`, `cpt-cyberwiki-actor-commenter`
+
+#### Date Insertion via `//` Shortcut
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-date-shortcut`
+
+The system **MUST** support date insertion when the user types the `//` keyboard shortcut in the editor. The UI **MUST** show a calendar picker with the current date highlighted, and the selected date **MUST** be inserted in `YYYY-MM-DD` format.
+
+**Rationale**: Fast structured date insertion improves authoring speed and reduces formatting ambiguity.
+
+**Actors**: `cpt-cyberwiki-actor-editor`
+
+#### Date Badge Rendering in All Views
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-date-badge-rendering`
+
+The system **MUST** render all valid `YYYY-MM-DD` date values as date badges (not plain text) in edit preview and read-only document view.
+
+**Rationale**: Consistent badge rendering makes dates visually scannable and standardizes timeline-oriented documentation.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-viewer`, `cpt-cyberwiki-actor-commenter`
+
+#### User Search and Tagging via `@` Shortcut
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-user-tag-search-shortcut`
+
+The system **MUST** support automatic user search and tagging when an author types `@` in the editor, including suggestions/autocomplete sourced from accessible workspace members.
+
+**Rationale**: Real-time search during tagging is a baseline collaboration requirement for fast, accurate mentions.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`
+
+#### Mention and Task Discovery from Synced Markdown
+
+- [ ] `p3` - **ID**: `cpt-cyberwiki-fr-mention-task-sync-discovery`
+
+The system **MUST** regularly scan synced Markdown files to discover newly added `@user` mentions and checklist tasks (`[ ]` / `[x]`) that were introduced outside the Cyber Wiki UI (for example, direct Git commits or pull requests).
+
+**Rationale**: Discovery from Git-originated edits keeps mentions and tasks complete even when authoring bypasses the web editor.
+
+**Actors**: `cpt-cyberwiki-actor-git-repo`, `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`
+
+#### Mention Entity Storage and Badge Rendering
+
+- [ ] `p3` - **ID**: `cpt-cyberwiki-fr-mention-entity-badge-render`
+
+Each detected or inserted user tag **MUST** be stored as a structured mention entity (not plain text only). Mentions **MUST** be rendered as user badges in document views, and the currently authenticated user's own badge **MUST** be visually highlighted.
+
+**Rationale**: Structured mention entities and badge rendering enable reliable indexing, notifications, and rapid self-relevance scanning.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
+
+#### Mention Index for Tagged Users
+
+- [ ] `p3` - **ID**: `cpt-cyberwiki-fr-mention-index`
+
+The system **MUST** provide a view where a tagged user can see all places they were mentioned across documents, including at minimum document name, location/snippet, mention author, and mention time.
+
+**Rationale**: A consolidated mention index prevents missed actions and removes the need to manually scan documents for `@` references.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
+
+#### Task Extraction from Checkbox Lines with Mentions and Dates
+
+- [ ] `p3` - **ID**: `cpt-cyberwiki-fr-task-extraction-checkbox`
+
+The system **MUST** treat Markdown checklist items such as `[ ] lorem ipsum` as tasks.
+
+For any checklist line:
+1. If one or more `@` mentions are present on the same line, the task **MUST** be assigned to the tagged user(s)
+2. If a date badge/date value is present on the same line, that date **MUST** be treated as the task deadline
+3. `[ ]` **MUST** represent an open task; `[x]` **MUST** represent a closed task
+
+**Rationale**: Converting lightweight checklist syntax into structured tasks preserves authoring simplicity while enabling accountability and deadline-driven execution.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
+
+#### Task Dashboard by Assignee and Deadline
+
+- [ ] `p3` - **ID**: `cpt-cyberwiki-fr-task-dashboard`
+
+The system **MUST** provide a standalone task dashboard showing tasks assigned to users, with filters for open/closed status and assignee, and sorting by deadline (nearest first by default). Individual users **MUST** be able to view all tasks assigned to themselves, including both open and closed tasks.
+
+**Rationale**: A dedicated task dashboard turns inline checklist syntax into an actionable work queue.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
+
+#### User-Configurable Mention Notifications
+
+- [ ] `p3` - **ID**: `cpt-cyberwiki-fr-mention-notification-preferences`
+
+When Cyber Wiki discovers a user mention, the tagged user **MUST** receive a notification according to their personal notification preferences. Users **MUST** be able to configure whether to receive mention notifications via email, Microsoft Teams, and Slack.
+
+**Rationale**: Per-user channel preferences reduce notification fatigue while preserving responsiveness to mentions.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
+
+#### Admin-Configurable Default Notification Channels
+
+- [ ] `p3` - **ID**: `cpt-cyberwiki-fr-admin-default-notification-channels`
+
+Admins **MUST** be able to configure default mention notification channels (email, Microsoft Teams, Slack) that apply to users until users explicitly override those defaults in personal settings.
+
+**Rationale**: Central defaults provide a safe baseline communication policy while preserving user-level control.
+
+**Actors**: `cpt-cyberwiki-actor-admin`
+
+#### Smart Editing: Newly Typed Text Highlighting
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-smart-edit-highlight-new-text`
+
+The system **MUST** visually distinguish newly typed text during an editing session (for example, via subtle highlight background, underline, or change marker) so users can immediately identify fresh input before saving.
+
+**Rationale**: Immediate visibility of freshly authored content helps users review and validate edits in long technical documents.
+
+**Actors**: `cpt-cyberwiki-actor-editor`
+
+#### Smart Editing: AI Refinement of Typed Text
+
+- [ ] `p2` - **ID**: `cpt-cyberwiki-fr-smart-edit-ai-refine`
+
+The system **MUST** allow users to refine selected or newly typed text with AI via a keyboard shortcut and/or by sending the text to an integrated chat assistant. Users **MUST** be able to preview and accept or reject the AI-proposed refinement before applying it.
+
+**Rationale**: Inline AI refinement shortens the edit loop and improves clarity without forcing users to leave the document workflow.
 
 **Actors**: `cpt-cyberwiki-actor-editor`
 
@@ -657,6 +848,16 @@ Cyber Wiki depends on the following external integration contracts:
 ## 9. Acceptance Criteria
 
 - [ ] An Editor can open, edit, and commit a Markdown document entirely from the browser without a local Git client
+- [ ] An Editor can apply standard formatting (bold, italic, strikethrough, links, lists) and see identical rendering in edit preview and read-only view
+- [ ] Typing `//` opens a date picker with current day highlighted and inserts selected dates in `YYYY-MM-DD` format
+- [ ] All `YYYY-MM-DD` date values are rendered as date badges in edit preview and read-only view
+- [ ] Typing `@` triggers user autocomplete/search; mentions are saved as structured entities and rendered as badges with current user highlight
+- [ ] The platform discovers `@user` mentions and Markdown checklist tasks from synced Git changes, including edits made outside the Cyber Wiki UI
+- [ ] Checklist lines (`[ ]`) are treated as tasks; same-line `@` mentions become assignees, same-line dates become deadlines, and `[x]` marks tasks as closed
+- [ ] A standalone task dashboard shows assigned tasks with open/closed filtering and deadline ordering
+- [ ] Tagged users can see all mention locations and receive mention notifications by configured channels (email, Teams, Slack)
+- [ ] Admins can define default mention notification channels (email, Teams, Slack) used until overridden by users
+- [ ] Newly typed text is visually highlighted during an edit session, and the Editor can invoke AI refinement (shortcut or chat) with accept/reject control
 - [ ] A document with a broken internal link cannot be saved until the link is resolved or the check is explicitly overridden
 - [ ] Mermaid and draw.io diagrams render inline in the document viewer
 - [ ] Semantic search returns relevant results for a natural-language query across a corpus of at least 1,000 documents
