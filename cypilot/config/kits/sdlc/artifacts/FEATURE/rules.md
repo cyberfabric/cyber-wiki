@@ -4,9 +4,9 @@
 **Kit**: sdlc
 
 **Dependencies** (lazy-loaded):
-- `config/kits/sdlc/artifacts/FEATURE/template.md` — structural reference (load WHEN validating structure)
-- `config/kits/sdlc/artifacts/FEATURE/checklist.md` — semantic quality criteria (load WHEN checking semantic quality)
-- `config/kits/sdlc/artifacts/FEATURE/examples/example.md` — reference implementation (load WHEN needing CDSL style reference)
+- `{feature_template}` — structural reference (load WHEN validating structure)
+- `{feature_checklist}` — semantic quality criteria (load WHEN checking semantic quality)
+- `{feature_example}` — reference implementation (load WHEN needing CDSL style reference)
 
 ## Table of Contents
 
@@ -59,9 +59,9 @@
 
 ### Structural
 
-**Load on demand**: `config/kits/sdlc/artifacts/FEATURE/template.md` — WHEN validating structure
+**Load on demand**: `{feature_template}` — WHEN validating structure
 
-- [ ] FEATURE follows `config/kits/sdlc/artifacts/FEATURE/template.md` structure
+- [ ] FEATURE follows `{feature_template}` structure
 - [ ] Artifact frontmatter (optional): use `cpt:` format for document metadata
 - [ ] References parent feature from DECOMPOSITION manifest
 - [ ] All flows, algorithms, states, DoD items have unique IDs
@@ -81,7 +81,7 @@
 
 ### Semantic
 
-**Load on demand**: `config/kits/sdlc/artifacts/FEATURE/checklist.md` — WHEN checking semantic quality
+**Load on demand**: `{feature_checklist}` — WHEN checking semantic quality
 
 - [ ] Actor flows define complete user journeys
 - [ ] Algorithms specify processing logic clearly
@@ -100,9 +100,9 @@
 
 ### Constraints
 
-**Load on demand**: `config/kits/sdlc/constraints.toml` — WHEN validating cross-references
+**Load on demand**: `{constraints}` — WHEN validating cross-references
 
-- [ ] ALWAYS open and follow `config/kits/sdlc/constraints.toml` (kit root)
+- [ ] ALWAYS open and follow `{constraints}` (kit root)
 - [ ] Treat `constraints.toml` as primary validator for:
   - where IDs are defined
   - where IDs are referenced
@@ -250,7 +250,7 @@ FEATURE documents must NOT contain the following — report as violation if foun
 
 ### Phase 2: Content Creation
 
-**Load on demand**: `config/kits/sdlc/artifacts/FEATURE/template.md` — WHEN generating artifact structure
+**Load on demand**: `{feature_template}` — WHEN generating artifact structure
 
 **CDSL instruction generation:**
 - [ ] Each instruction has phase marker: `\`pN\``
@@ -270,10 +270,10 @@ FEATURE documents must NOT contain the following — report as violation if foun
 
 ### Phase 4: Quality Check
 
-**Load on demand**: `config/kits/sdlc/artifacts/FEATURE/examples/example.md` — WHEN comparing CDSL style
+**Load on demand**: `{feature_example}` — WHEN comparing CDSL style
 
-- [ ] Compare CDSL style to `config/kits/sdlc/artifacts/FEATURE/examples/example.md`
-- [ ] Self-review against `config/kits/sdlc/artifacts/FEATURE/checklist.md` MUST HAVE items
+- [ ] Compare CDSL style to `{feature_example}`
+- [ ] Self-review against `{feature_checklist}` MUST HAVE items
 - [ ] Ensure no MUST NOT HAVE violations
 - [ ] Verify parent feature reference exists
 
@@ -298,9 +298,9 @@ FEATURE documents must NOT contain the following — report as violation if foun
 
 ### Phase 2: Semantic Validation (Checklist-based)
 
-**Load on demand**: `config/kits/sdlc/artifacts/FEATURE/checklist.md` — required for this phase
+**Load on demand**: `{feature_checklist}` — required for this phase
 
-Apply `config/kits/sdlc/artifacts/FEATURE/checklist.md` systematically:
+Apply `{feature_checklist}` systematically:
 1. For each MUST HAVE item: check if requirement is met
 2. For each MUST NOT HAVE item: scan document for violations
 3. Use example for quality baseline

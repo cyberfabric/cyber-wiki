@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "name": "cyber-wiki",
+      "path": "."
+    },
+    {
+      "name": "cyber-wiki-back",
+      "path": ".workspace-sources/cyberfabric/cyber-wiki-back"
+    },
+    {
+      "name": "cyber-wiki-front",
+      "path": ".workspace-sources/cyberfabric/cyber-wiki-front"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      ".workspace-sources": true
+    },
+    "search.exclude": {
+      ".workspace-sources": true
+    }
+  }
+}

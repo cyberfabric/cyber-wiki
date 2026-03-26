@@ -4,9 +4,9 @@
 **Kit**: sdlc
 
 **Dependencies** (lazy-loaded):
-- `config/kits/sdlc/artifacts/DESIGN/template.md` — structural reference (load WHEN validating structure)
-- `config/kits/sdlc/artifacts/DESIGN/checklist.md` — semantic quality criteria (load WHEN checking semantic quality)
-- `config/kits/sdlc/artifacts/DESIGN/examples/example.md` — reference implementation (load WHEN needing content depth reference)
+- `{design_template}` — structural reference (load WHEN validating structure)
+- `{design_checklist}` — semantic quality criteria (load WHEN checking semantic quality)
+- `{design_example}` — reference implementation (load WHEN needing content depth reference)
 
 ## Table of Contents
 
@@ -55,9 +55,9 @@ Read parent PRD for context (if exists).
 
 ### Structural
 
-**Load on demand**: `config/kits/sdlc/artifacts/DESIGN/template.md` — WHEN validating structure
+**Load on demand**: `{design_template}` — WHEN validating structure
 
-- [ ] DESIGN follows `config/kits/sdlc/artifacts/DESIGN/template.md` structure
+- [ ] DESIGN follows `{design_template}` structure
 - [ ] Artifact frontmatter (optional): use `cpt:` format for document metadata
 - [ ] All required sections present and non-empty
 - [ ] All IDs follow `cpt-{hierarchy-prefix}-{kind}-{slug}` convention (see artifacts.toml for hierarchy)
@@ -74,7 +74,7 @@ Read parent PRD for context (if exists).
 
 ### Semantic
 
-**Load on demand**: `config/kits/sdlc/artifacts/DESIGN/checklist.md` — WHEN checking semantic quality
+**Load on demand**: `{design_checklist}` — WHEN checking semantic quality
 
 - [ ] Architecture overview is complete and clear
 - [ ] Domain model defines all core types
@@ -122,11 +122,11 @@ Read parent PRD for context (if exists).
 ### Constraints
 
 **Load on demand**:
-- `config/kits/sdlc/constraints.toml` — WHEN validating cross-references
+- `{constraints}` — WHEN validating cross-references
 - `{cypilot_path}/.core/architecture/specs/kit/constraints.md` — WHEN resolving constraint rules
 - `{cypilot_path}/.core/schemas/kit-constraints.schema.json` — WHEN validating constraints schema
 
-- [ ] ALWAYS open and follow `config/kits/sdlc/constraints.toml` (kit root)
+- [ ] ALWAYS open and follow `{constraints}` (kit root)
 - [ ] Treat `constraints.toml` as primary validator for:
   - where IDs are defined
   - where IDs are referenced
@@ -184,8 +184,8 @@ DESIGN documents must NOT contain the following — report as violation if found
 ### Phase 2: Content Creation
 
 **Load on demand**:
-- `config/kits/sdlc/artifacts/DESIGN/template.md` — WHEN generating artifact structure
-- `config/kits/sdlc/artifacts/DESIGN/examples/example.md` — WHEN needing reference for content depth
+- `{design_template}` — WHEN generating artifact structure
+- `{design_example}` — WHEN needing reference for content depth
 
 **Apply checklist.md semantics during creation:**
 
@@ -230,7 +230,7 @@ If DESIGN cannot be completed in a single session:
 
 ### Phase 4: Quality Check
 
-- [ ] Self-review against `config/kits/sdlc/artifacts/DESIGN/checklist.md` MUST HAVE items
+- [ ] Self-review against `{design_checklist}` MUST HAVE items
 - [ ] Ensure no MUST NOT HAVE violations
 - [ ] Verify PRD traceability
 
@@ -253,9 +253,9 @@ If DESIGN cannot be completed in a single session:
 
 ### Phase 2: Semantic Validation (Checklist-based)
 
-**Load on demand**: `config/kits/sdlc/artifacts/DESIGN/checklist.md` — required for this phase
+**Load on demand**: `{design_checklist}` — required for this phase
 
-- [ ] Read `config/kits/sdlc/artifacts/DESIGN/checklist.md` in full
+- [ ] Read `{design_checklist}` in full
 - [ ] For each MUST HAVE item: check if requirement is met
   - If not met: report as violation with severity
   - If not applicable: verify explicit "N/A" with reasoning
@@ -345,7 +345,7 @@ When reviewing PRs that add or change design documents, additionally focus on:
 - [ ] Trade-off analysis — are alternatives considered and justified?
 - [ ] API contract consistency with existing endpoints and conventions
 - [ ] Security considerations — authentication, authorization, data protection
-- [ ] Compliance with `config/kits/sdlc/artifacts/DESIGN/template.md` structure
+- [ ] Compliance with `{design_template}` structure
 - [ ] Identify antipatterns — god objects, leaky abstractions, tight coupling
 - [ ] Compare proposed design with existing industry patterns in SaaS platforms
 - [ ] Compare proposed design with IEEE, ISO, and other industry standards where applicable
