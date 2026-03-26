@@ -4,7 +4,7 @@
 **Kit**: sdlc
 
 **Dependencies** (lazy-loaded):
-- `config/kits/sdlc/codebase/checklist.md` — semantic quality criteria (load WHEN checking code quality)
+- `{codebase_checklist}` — semantic quality criteria (load WHEN checking code quality)
 
 ## Table of Contents
 
@@ -148,7 +148,7 @@ PRD/DESIGN: referenced IDs [x] when ALL downstream refs [x]
 ### Quality
 
 **Load on demand**:
-- `config/kits/sdlc/codebase/checklist.md` — WHEN checking code quality
+- `{codebase_checklist}` — WHEN checking code quality
 - `{cypilot_path}/.core/requirements/code-checklist.md` — WHEN checking generic code quality
 
 - [ ] Code passes quality checklist
@@ -240,9 +240,9 @@ After each work package, sync checkboxes:
 
 ### Phase 5: Quality Check
 
-**Load on demand**: `config/kits/sdlc/codebase/checklist.md` — WHEN self-reviewing code quality
+**Load on demand**: `{codebase_checklist}` — WHEN self-reviewing code quality
 
-- [ ] Self-review against `config/kits/sdlc/codebase/checklist.md`
+- [ ] Self-review against `{codebase_checklist}`
 - [ ] If Traceability Mode ON: verify all `to_code="true"` IDs have markers
 - [ ] If Traceability Mode ON: ensure no orphaned markers
 - [ ] Run tests to verify implementation

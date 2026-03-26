@@ -4,9 +4,9 @@
 **Kit**: sdlc
 
 **Dependencies** (lazy-loaded):
-- `config/kits/sdlc/artifacts/ADR/template.md` — structural reference (load WHEN validating structure)
-- `config/kits/sdlc/artifacts/ADR/checklist.md` — semantic quality criteria (load WHEN checking semantic quality)
-- `config/kits/sdlc/artifacts/ADR/examples/example.md` — reference implementation (load WHEN needing content reference)
+- `{adr_template}` — structural reference (load WHEN validating structure)
+- `{adr_checklist}` — semantic quality criteria (load WHEN checking semantic quality)
+- `{adr_example}` — reference implementation (load WHEN needing content reference)
 
 ## Table of Contents
 
@@ -55,9 +55,9 @@ Read `{cypilot_path}/config/artifacts.toml` to determine ADR directory.
 
 ### Structural
 
-**Load on demand**: `config/kits/sdlc/artifacts/ADR/template.md` — WHEN validating structure
+**Load on demand**: `{adr_template}` — WHEN validating structure
 
-- [ ] ADR follows `config/kits/sdlc/artifacts/ADR/template.md` structure
+- [ ] ADR follows `{adr_template}` structure
 - [ ] Artifact frontmatter is required
 - [ ] ADR has unique ID: `cpt-{hierarchy-prefix}-adr-{slug}` (e.g., `cpt-myapp-adr-use-postgresql`)
 - [ ] ID has priority marker (`p1`-`p9`)
@@ -74,7 +74,7 @@ Read `{cypilot_path}/config/artifacts.toml` to determine ADR directory.
 
 ### Semantic
 
-**Load on demand**: `config/kits/sdlc/artifacts/ADR/checklist.md` — WHEN checking semantic quality
+**Load on demand**: `{adr_checklist}` — WHEN checking semantic quality
 
 - [ ] Problem/context clearly stated
 - [ ] At least 2-3 options considered
@@ -138,11 +138,11 @@ Keep REJECTED ADRs for historical record — do not delete.
 ### Constraints
 
 **Load on demand**:
-- `config/kits/sdlc/constraints.toml` — WHEN validating cross-references
+- `{constraints}` — WHEN validating cross-references
 - `{cypilot_path}/.core/architecture/specs/traceability.md` — WHEN checking ID formats
 - `{cypilot_path}/.core/architecture/specs/kit/constraints.md` — WHEN resolving constraint rules
 
-- [ ] ALWAYS open and follow `config/kits/sdlc/constraints.toml` (kit root)
+- [ ] ALWAYS open and follow `{constraints}` (kit root)
 - [ ] Treat `constraints.toml` as primary validator for:
   - where IDs are defined
   - where IDs are referenced
@@ -225,8 +225,8 @@ ADRs must NOT contain the following — report as violation if found:
 ### Phase 2: Content Creation
 
 **Load on demand**:
-- `config/kits/sdlc/artifacts/ADR/template.md` — WHEN generating artifact structure
-- `config/kits/sdlc/artifacts/ADR/examples/example.md` — WHEN needing reference for content
+- `{adr_template}` — WHEN generating artifact structure
+- `{adr_example}` — WHEN needing reference for content
 
 **Use example as reference:**
 
@@ -246,8 +246,8 @@ ADRs must NOT contain the following — report as violation if found:
 
 ### Phase 4: Quality Check
 
-- [ ] Compare to `config/kits/sdlc/artifacts/ADR/examples/example.md`
-- [ ] Self-review against `config/kits/sdlc/artifacts/ADR/checklist.md`
+- [ ] Compare to `{adr_example}`
+- [ ] Self-review against `{adr_checklist}`
 - [ ] Verify rationale is complete
 
 **ADR Immutability Rule**:
@@ -272,9 +272,9 @@ Run `cypilot validate` for:
 
 ### Phase 2: Semantic Validation (Checklist-based)
 
-**Load on demand**: `config/kits/sdlc/artifacts/ADR/checklist.md` — required for this phase
+**Load on demand**: `{adr_checklist}` — required for this phase
 
-Apply `config/kits/sdlc/artifacts/ADR/checklist.md`:
+Apply `{adr_checklist}`:
 1. Verify context explains why decision needed
 2. Verify options have pros/cons
 3. Verify decision has clear rationale
@@ -412,7 +412,7 @@ Select review depth based on ADR complexity and impact:
 When reviewing PRs that add or change Architecture Decision Records, additionally focus on:
 
 - [ ] Ensure the problem is module/system scoped, not generic and repeatable
-- [ ] Compliance with `config/kits/sdlc/artifacts/ADR/template.md` structure
+- [ ] Compliance with `{adr_template}` structure
 - [ ] Ensure the problem is not already solved by other existing ADRs in the project ADR directory (see `{cypilot_path}/config/artifacts.toml` for path)
 - [ ] Alternatives are genuinely different approaches (not straw men)
 - [ ] Decision rationale is concrete and traceable to project constraints
