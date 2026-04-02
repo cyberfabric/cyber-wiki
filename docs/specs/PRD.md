@@ -99,6 +99,7 @@ The result is fragmented knowledge: stale wiki pages that no longer reflect the 
 **Capabilities:**
 
 - Browse, author, and review Git-backed documents from a web UI
+- Seamless bidirectional navigation between Git raw documents and Cyber Wiki viewer (click raw doc link in Git to open in browser with full context; click in viewer to see raw doc in Git)
 - VS Code extension for IDE-native access to documentation browsing, editing, and commenting
 - REST API access for AI agents (CyPilot) to read, search, and analyze documentation content
 - Leave context-aware inline comments that survive content changes (comments are flagged when anchored text is removed)
@@ -214,7 +215,7 @@ The result is fragmented knowledge: stale wiki pages that no longer reflect the 
 
 Cyber Wiki is a self-hosted, single-team web application. It is accessed via a browser by all human actors. All document changes flow through Git — the platform never holds document state that is not committed or pending commit to a repository.
 
-The platform operates in a staging environment in v1; a production-grade deployment is explicitly out of scope. There are no multi-tenancy requirements in v1.
+The platform provides seamless bidirectional navigation between Git raw documents and the Cyber Wiki viewer: users can click document links in their VCS provider (GitHub, Bitbucket) to open documents in Cyber Wiki with full context, and every document in Cyber Wiki provides a link back to the raw document in Git. This ensures users can move fluidly between the raw Git view (for code review, blame, history) and the Cyber Wiki view (for rich preview, comments, validation) without manual navigation overhead.
 
 ---
 
@@ -899,6 +900,22 @@ The system **MUST** support GitHub and Bitbucket Server as VCS providers, and **
 **Rationale**: Engineering teams run a variety of self-hosted or cloud VCS platforms; a pluggable interface prevents vendor lock-in and enables incremental provider coverage.
 
 **Actors**: `cpt-cyberwiki-actor-admin`, `cpt-cyberwiki-actor-editor`
+
+#### Seamless Git-to-Viewer Navigation
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-git-viewer-navigation`
+
+The system **MUST** provide seamless bidirectional navigation between Git raw documents and the Cyber Wiki viewer:
+
+1. **Git → Viewer** — clicking a document link in the VCS provider (GitHub, Bitbucket) **MUST** open the document in Cyber Wiki with full context (Space navigation, inline comments, JIRA badges, rich preview)
+2. **Viewer → Git** — every document view in Cyber Wiki **MUST** provide a "View in Git" or "View raw" link that opens the raw document in the VCS provider at the current commit/branch
+3. **Deep linking** — links **MUST** preserve context such as line numbers, commit SHA, and branch name when navigating between systems
+
+The system **MUST** support this navigation through URL patterns or browser extensions that intercept VCS provider document URLs and redirect to Cyber Wiki.
+
+**Rationale**: Users need to move fluidly between the raw Git view (for code review, blame, history) and the Cyber Wiki view (for rich preview, comments, validation). Forcing users to manually navigate between systems breaks their workflow. Seamless linking ensures users can click a GitHub/Bitbucket link and immediately see the document with full Cyber Wiki context, and vice versa.
+
+**Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
 
 #### VCS Provider Interface Contract
 
