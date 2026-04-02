@@ -174,7 +174,7 @@ This section maps all PRD requirements to backend design components and implemen
 
 | Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
 |----------------|----------|---------------------|---------------------|--------|----------------|
-| `cpt-cyberwiki-fr-live-edit` | p1 | In-browser editing with live preview | Frontend responsibility, Backend save API | [ ] Not Started | Section 5.3 |
+| `cpt-cyberwiki-fr-live-edit` | p1 | WYSIWYG editing with optional raw mode toggle | Frontend responsibility, Backend save API (handles both WYSIWYG and raw Markdown) | [ ] Not Started | Section 5.3 |
 | `cpt-cyberwiki-fr-standard-formatting` | p1 | Standard formatting controls | Frontend responsibility | N/A | N/A |
 | `cpt-cyberwiki-fr-date-shortcut` | p1 | Date insertion via `//` shortcut | Frontend responsibility | N/A | N/A |
 | `cpt-cyberwiki-fr-date-badge-rendering` | p1 | Date badge rendering | Frontend responsibility | N/A | N/A |
@@ -196,8 +196,10 @@ This section maps all PRD requirements to backend design components and implemen
 | `cpt-cyberwiki-fr-comment-threads` | p2 | Threaded comment replies | `FileComment.parent`, Thread query logic | [x] Designed | Section 4.2 |
 | `cpt-cyberwiki-fr-comment-storage` | p1 | Database-native comment storage | `wiki.models.FileComment`, PostgreSQL/SQLite | [x] Designed | Section 4.2 |
 | `cpt-cyberwiki-fr-comment-line-anchoring` | p1 | Line-level comment anchoring | `SourceAddress` URI, Line range storage | [x] Designed | Section 4.2 |
+| `cpt-cyberwiki-fr-document-level-comments` | p1 | Document-level comments at page bottom | `wiki.models.DocumentComment`, Comment API | [ ] Not Started | TBD |
 | `cpt-cyberwiki-fr-mention-notification-preferences` | p3 | User notification preferences | `users.models.UserProfile.notification_prefs`, Notification service | [ ] Not Started | TBD |
 | `cpt-cyberwiki-fr-admin-default-notification-channels` | p3 | Admin default notification channels | Configuration settings, Admin panel | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-document-change-notifications` | p2 | Document change notification subscriptions | `wiki.models.NotificationSubscription`, Notification service, Subscription API | [ ] Not Started | TBD |
 
 #### Change Management Requirements
 
@@ -238,8 +240,23 @@ This section maps all PRD requirements to backend design components and implemen
 
 | Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
 |----------------|----------|---------------------|---------------------|--------|----------------|
-| `cpt-cyberwiki-fr-fulltext-search` | p2 | Full-text search across documents | Search index, `wiki.views.search`, PostgreSQL full-text | [ ] Not Started | TBD |
-| `cpt-cyberwiki-fr-semantic-search` | p2 | AI-powered semantic search | Vector embeddings, Similarity search API | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-fulltext-search` | p1 | Full-text search with exact keyword matching, file/folder filtering | Search index, `wiki.views.search`, PostgreSQL full-text, Filter API | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-semantic-search` | p2 | Optional AI-powered semantic search | Vector embeddings, Similarity search API, Opt-in toggle | [ ] Not Started | TBD |
+
+#### AI & Collaboration Requirements
+
+| Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
+|----------------|----------|---------------------|---------------------|--------|----------------|
+| `cpt-cyberwiki-fr-ai-chat` | p2 | Embedded AI chat interface for documentation assistance | AI chat API, LLM integration, Context retrieval | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-ai-inline-editing` | p2 | Inline AI editing assistance integration | AI refinement API, LLM integration (CyPilot, Claude, GPT, local models) | [ ] Not Started | TBD |
+
+#### Navigation & Integration Requirements
+
+| Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
+|----------------|----------|---------------------|---------------------|--------|----------------|
+| `cpt-cyberwiki-fr-git-viewer-navigation` | p1 | Seamless bidirectional Git-to-viewer navigation | URL pattern generation, Deep linking API, Git URL parser | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-vscode-extension` | p1 | VS Code extension for IDE-native access | VS Code extension (separate codebase), Backend API support | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-api-agent-access` | p1 | REST API access for AI agents (CyPilot) | Agent API endpoints, Token authentication, Read-only access control | [ ] Not Started | TBD |
 
 #### JIRA Integration Requirements
 

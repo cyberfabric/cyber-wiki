@@ -172,7 +172,7 @@ This section maps all PRD requirements to frontend design components and impleme
 
 | Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
 |----------------|----------|---------------------|---------------------|--------|----------------|
-| `cpt-cyberwiki-fr-live-edit` | p1 | In-browser editing with live preview | `MarkdownEditor`, `LivePreview`, `EditorToolbar` | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-live-edit` | p1 | WYSIWYG editing with optional raw mode toggle | `WYSIWYGEditor`, `RawEditor`, `EditorModeToggle`, `EditorToolbar` | [ ] Not Started | TBD |
 | `cpt-cyberwiki-fr-standard-formatting` | p1 | Standard formatting controls (bold, italic, lists, etc.) | `EditorToolbar`, `MarkdownFormatRenderer` | [ ] Not Started | TBD |
 | `cpt-cyberwiki-fr-date-shortcut` | p1 | Date insertion via `//` shortcut | `MarkdownEditor` keyboard handler, `DatePicker` | [ ] Not Started | TBD |
 | `cpt-cyberwiki-fr-date-badge-rendering` | p1 | Date badge rendering in all views | `DateBadge` component, `MarkdownFormatRenderer` | [ ] Not Started | TBD |
@@ -194,8 +194,10 @@ This section maps all PRD requirements to frontend design components and impleme
 | `cpt-cyberwiki-fr-comment-threads` | p2 | Threaded comment replies | `CommentThread`, `CommentReply` | [ ] Not Started | Section 4.6 |
 | `cpt-cyberwiki-fr-comment-storage` | p1 | Database-native comment storage | Backend integration via `commentsApi` | [x] Designed | Section 4.6 |
 | `cpt-cyberwiki-fr-comment-line-anchoring` | p1 | Line-level comment anchoring | `EnrichmentMarker`, Dual mapping system | [x] Designed | Section 4.6 |
+| `cpt-cyberwiki-fr-document-level-comments` | p1 | Document-level comments at page bottom | `DocumentCommentsSection`, `CommentThread` | [ ] Not Started | TBD |
 | `cpt-cyberwiki-fr-mention-notification-preferences` | p3 | User notification preferences | `UserSettings`, `notificationApi` | [ ] Not Started | TBD |
 | `cpt-cyberwiki-fr-admin-default-notification-channels` | p3 | Admin default notification channels | Admin settings panel, Backend config | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-document-change-notifications` | p2 | Document change notification subscriptions | `NotificationSubscriptionPanel`, `SubscriptionManager`, `notificationApi` | [ ] Not Started | TBD |
 
 #### Change Management Requirements
 
@@ -229,8 +231,23 @@ This section maps all PRD requirements to frontend design components and impleme
 
 | Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
 |----------------|----------|---------------------|---------------------|--------|----------------|
-| `cpt-cyberwiki-fr-fulltext-search` | p2 | Full-text search across documents | `SearchBar`, `SearchResults`, `searchApi` | [ ] Not Started | TBD |
-| `cpt-cyberwiki-fr-semantic-search` | p2 | AI-powered semantic search | `SemanticSearchToggle`, Backend embeddings API | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-fulltext-search` | p1 | Full-text search with exact keyword matching, file/folder filtering | `SearchBar`, `SearchResults`, `SearchFilters`, `searchApi` | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-semantic-search` | p2 | Optional AI-powered semantic search | `SemanticSearchToggle`, Backend embeddings API | [ ] Not Started | TBD |
+
+#### AI & Collaboration Requirements
+
+| Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
+|----------------|----------|---------------------|---------------------|--------|----------------|
+| `cpt-cyberwiki-fr-ai-chat` | p2 | Embedded AI chat interface for documentation assistance | `AIChatPanel`, `ChatInterface`, `aiApi` | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-ai-inline-editing` | p2 | Inline AI editing assistance integration | `AIRefineButton`, `aiApi`, LLM integration | [ ] Not Started | TBD |
+
+#### Navigation & Integration Requirements
+
+| Requirement ID | Priority | Requirement Summary | Design Component(s) | Status | Design Section |
+|----------------|----------|---------------------|---------------------|--------|----------------|
+| `cpt-cyberwiki-fr-git-viewer-navigation` | p1 | Seamless bidirectional Git-to-viewer navigation | `ViewInGitButton`, URL interceptor, Deep linking | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-vscode-extension` | p1 | VS Code extension for IDE-native access | VS Code extension project (separate codebase) | [ ] Not Started | TBD |
+| `cpt-cyberwiki-fr-api-agent-access` | p1 | REST API access for AI agents (CyPilot) | Backend API endpoints, Authentication | [ ] Not Started | TBD |
 
 #### JIRA Integration Requirements
 
@@ -1767,15 +1784,17 @@ This section shows how each PRD use case flows through the frontend architecture
 
 2. **Enter Edit Mode**
    - User clicks "Edit" button in `FileViewer`
-   - `FileViewer` switches from read-only renderer to `MarkdownEditor` component
-   - `MarkdownEditor` loads current content via `wikiApi.getFileContent()`
+   - `FileViewer` switches from read-only renderer to `WYSIWYGEditor` component (default mode)
+   - `WYSIWYGEditor` loads current content via `wikiApi.getFileContent()`
 
-3. **Edit Content**
-   - User types in `MarkdownEditor` (CodeMirror-based)
-   - `LivePreview` component renders Markdown in real-time using `MarkdownFormatRenderer`
+3. **Edit Content (WYSIWYG Mode)**
+   - User types in `WYSIWYGEditor` (rich text editor)
+   - Formatting (headings, bold, underline, colors, tables, links) renders as formatted content while editing
+   - No separate preview mode; underlying file format is transparent to user
    - `ChangeTracker` highlights newly typed text (requirement `cpt-cyberwiki-fr-smart-edit-highlight-new-text`)
    - User can insert dates via `//` shortcut → `DatePicker` modal → inserts `YYYY-MM-DD`
    - User can tag users via `@` shortcut → `MentionAutocomplete` → inserts `@username`
+   - **Optional**: User can toggle to `RawEditor` mode via `EditorModeToggle` to view/edit underlying Markdown source; toggle back to WYSIWYG at any time without losing changes
 
 4. **Validate Before Save**
    - User clicks "Save" button
@@ -2079,24 +2098,26 @@ This section shows how each PRD use case flows through the frontend architecture
 
 This section provides detailed specifications for key frontend components.
 
-#### 17.1 MarkdownEditor Component
+#### 17.1 WYSIWYGEditor Component
 
-**Purpose**: In-browser Markdown editor with live preview and smart editing features
+**Purpose**: WYSIWYG editor (default) with optional raw editing mode toggle for Markdown documents
 
 **Props**:
 ```typescript
-interface MarkdownEditorProps {
+interface WYSIWYGEditorProps {
   initialContent: string;
   onSave: (content: string, commitMessage: string) => Promise<void>;
   onCancel: () => void;
   readOnly?: boolean;
+  defaultMode?: 'wysiwyg' | 'raw'; // Default: 'wysiwyg'
 }
 ```
 
 **State**:
 ```typescript
-interface MarkdownEditorState {
+interface WYSIWYGEditorState {
   content: string;
+  editorMode: 'wysiwyg' | 'raw'; // Current editing mode
   cursorPosition: number;
   changeRanges: Array<{ start: number; end: number }>; // Newly typed text
   showDatePicker: boolean;
@@ -2106,10 +2127,19 @@ interface MarkdownEditorState {
 ```
 
 **Key Methods**:
+- `toggleEditorMode()`: Switches between WYSIWYG and raw editing mode without losing unsaved changes
 - `handleKeyDown(event)`: Detects `//` for date picker, `@` for mentions
 - `insertDate(date: Date)`: Inserts `YYYY-MM-DD` at cursor
 - `insertMention(user: User)`: Inserts `@username` at cursor
 - `trackChanges()`: Highlights newly typed text ranges
+- `renderWYSIWYG()`: Renders rich text editor with formatting (headings, bold, underline, colors, tables, links) as formatted content
+- `renderRaw()`: Renders CodeMirror-based raw Markdown editor
+
+**Implementation Notes**:
+- WYSIWYG mode: Use rich text editor library (e.g., TipTap, ProseMirror) that renders formatting as formatted content while editing
+- No separate preview pane in WYSIWYG mode; formatting is visible inline
+- Raw mode: Use CodeMirror for syntax-highlighted Markdown editing
+- Mode toggle preserves unsaved content when switching between modes
 - `validate()`: Runs link checker before save
 
 **Keyboard Shortcuts**:
