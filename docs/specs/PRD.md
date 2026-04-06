@@ -814,10 +814,11 @@ The system **MUST** provide full-text search across all documents and spaces the
 
 1. **Exact keyword matching** — find documents containing the exact search terms
 2. **File/folder filtering** — filter results by specific files, folders, or Spaces
-3. **Result highlighting** — show document title, space name, highlighted excerpt with matched terms, and line number
-4. **Search within results** — ability to determine if a specific term exists in a file/folder without ranking
+3. **Tag filtering** — filter results by document tags (see `cpt-cyberwiki-fr-tag-search` for detailed tag search requirements)
+4. **Result highlighting** — show document title, space name, highlighted excerpt with matched terms, and line number
+5. **Search within results** — ability to determine if a specific term exists in a file/folder without ranking
 
-**Rationale**: Basic full-text search is the foundation requirement for any knowledge platform; without reliable keyword search that works consistently, users cannot find documents they need. This must work first before adding advanced features. Simple "does this term exist in this folder" queries are often more useful than relevance-ranked results.
+**Rationale**: Basic full-text search is the foundation requirement for any knowledge platform; without reliable keyword search that works consistently, users cannot find documents they need. This must work first before adding advanced features. Simple "does this term exist in this folder" queries are often more useful than relevance-ranked results. Tag filtering enables topic-based discovery complementing keyword search.
 
 **Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
 
@@ -1093,6 +1094,99 @@ The system **MUST** implement a line-anchoring algorithm that tracks the current
 
 **Actors**: `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
 
+### 6.13 Document Metadata & Tagging
+
+#### Unique Document Identifiers
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-document-unique-id`
+
+The system **MUST** assign a unique, stable identifier to every document in the platform. Document IDs **MUST** meet the following requirements:
+
+1. **Uniqueness** — IDs **MUST** be globally unique across all spaces and repositories
+2. **Stability** — IDs **MUST** remain stable when documents are renamed, moved, or refactored within the repository
+3. **Format** — IDs **MUST** be URL-safe strings (e.g., UUID v4, nanoid, or content-addressable hash)
+4. **Persistence** — IDs **MUST** be stored in document metadata (front-matter or platform database) and preserved across Git operations
+5. **Generation** — IDs **MUST** be automatically generated on first document indexing if not present
+6. **Visibility** — IDs **MUST** be visible in document metadata view and copyable for linking purposes
+
+**Rationale**: Stable document identifiers enable reliable cross-document linking that survives file renames and moves. Without stable IDs, links break when documents are reorganized, creating maintenance burden and broken references. Unique IDs are the foundation for cross-repository linking and reference tracking.
+
+**Actors**: `cpt-cyberwiki-actor-admin`, `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-viewer`
+
+#### Auto-Generated Tags (Word Cloud)
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-auto-tags`
+
+The system **MUST** automatically generate tags for each document based on the most common and significant words in the document content. Auto-generated tags **MUST** meet the following requirements:
+
+1. **Extraction Algorithm** — Extract tags using TF-IDF (Term Frequency-Inverse Document Frequency) or similar statistical analysis to identify significant terms
+2. **Stop Words Filtering** — Exclude common stop words (the, and, or, etc.) and programming language keywords from tag generation
+3. **Tag Count** — Generate between 5-15 tags per document, prioritized by relevance score
+4. **Tag Normalization** — Normalize tags to lowercase, remove special characters, and apply stemming/lemmatization
+5. **Update Frequency** — Regenerate tags automatically when document content changes significantly (configurable threshold, e.g., >20% content change)
+6. **Visibility** — Display auto-generated tags in document metadata view with visual distinction from custom tags (e.g., different color or icon)
+7. **Non-Editable** — Auto-generated tags **MUST NOT** be directly editable by users; they are system-managed
+
+**Rationale**: Auto-generated tags provide immediate discoverability for documents without requiring manual tagging effort. They enable content-based search and document clustering based on semantic similarity. Word cloud tags help users quickly understand document topics and find related content.
+
+**Actors**: System-generated, visible to all actors
+
+#### Custom User Tags
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-custom-tags`
+
+The system **MUST** allow users with Editor or Admin roles to create, edit, and delete custom tags for any document. Custom tags **MUST** meet the following requirements:
+
+1. **Tag Creation** — Users **MUST** be able to add custom tags through a tag input interface (autocomplete with existing tags)
+2. **Tag Format** — Tags **MUST** be alphanumeric strings with optional hyphens/underscores, maximum 50 characters
+3. **Tag Suggestions** — System **MUST** suggest existing tags as user types to encourage tag reuse and consistency
+4. **Tag Management** — Users **MUST** be able to remove custom tags they added
+5. **Tag Persistence** — Custom tags **MUST** be stored in the platform database and associated with document IDs
+6. **Tag Visibility** — Custom tags **MUST** be visually distinct from auto-generated tags
+7. **Tag Hierarchy** — System **MAY** support hierarchical tags (e.g., `category:subcategory`) for advanced organization
+8. **Bulk Tagging** — System **MAY** support applying tags to multiple documents simultaneously
+
+**Rationale**: Custom tags enable users to organize documents according to team-specific taxonomies, project phases, ownership, or any other classification scheme that auto-generated tags cannot capture. Manual tagging complements algorithmic tagging by adding human context and domain knowledge.
+
+**Actors**: `cpt-cyberwiki-actor-admin`, `cpt-cyberwiki-actor-editor`
+
+#### Cross-Repository Document Linking
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-cross-repo-linking`
+
+The system **MUST** support linking between documents across different Git repositories and spaces using stable document identifiers. Cross-repository linking **MUST** meet the following requirements:
+
+1. **Link Syntax** — Support a universal link syntax that references documents by their unique ID: `[[doc:DOCUMENT_ID]]` or `[[doc:DOCUMENT_ID|Display Text]]`
+2. **Link Resolution** — Resolve document IDs to their current location across all accessible repositories and spaces
+3. **Link Rendering** — Render links as clickable hyperlinks with document title as default display text
+4. **Link Validation** — Validate links during document save and warn users about broken references (missing documents or inaccessible repositories)
+5. **Link Preview** — Display document preview tooltip on hover showing document title, space, repository, and first few lines
+6. **Backlinks** — Display a "Referenced By" section showing all documents that link to the current document
+7. **Cross-System Links** — Support linking to external systems using URI schemes (e.g., `jira:KEY-123`, `github:org/repo#123`, `confluence:space/page`)
+8. **Link Migration** — Provide tools to update links when documents are moved between repositories
+
+**Rationale**: Cross-repository linking enables building a knowledge graph that spans multiple codebases and documentation repositories. Teams often split documentation across multiple repos (e.g., architecture docs in one repo, API specs in another, runbooks in a third), and need to reference documents across these boundaries. Stable IDs ensure links survive repository reorganizations.
+
+**Actors**: `cpt-cyberwiki-actor-admin`, `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-viewer`
+
+#### Tag-Based Search and Filtering
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-fr-tag-search`
+
+The system **MUST** support searching and filtering documents by tags (both auto-generated and custom). Tag-based search **MUST** meet the following requirements:
+
+1. **Tag Search** — Users **MUST** be able to search for documents by entering tag names in the search interface
+2. **Tag Filtering** — Search results **MUST** be filterable by one or more tags (AND/OR logic)
+3. **Tag Cloud View** — System **MUST** provide a tag cloud visualization showing all tags with frequency/size indication
+4. **Tag Navigation** — Clicking a tag **MUST** show all documents with that tag
+5. **Combined Search** — Users **MUST** be able to combine tag filters with full-text search queries
+6. **Tag Autocomplete** — Search interface **MUST** provide tag autocomplete suggestions
+7. **Related Tags** — System **MAY** suggest related tags based on co-occurrence patterns
+
+**Rationale**: Tags are only useful if they enable discovery. Tag-based search provides a complementary navigation path to full-text search, enabling users to browse documents by topic, category, or classification. Combined tag and text search enables precise filtering (e.g., "all architecture documents tagged 'security'").
+
+**Actors**: `cpt-cyberwiki-actor-admin`, `cpt-cyberwiki-actor-editor`, `cpt-cyberwiki-actor-commenter`, `cpt-cyberwiki-actor-viewer`
+
 ---
 
 ## 7. Non-Functional Requirements
@@ -1358,6 +1452,76 @@ Cyber Wiki depends on the following external integration contracts:
 - **No PRs available**: System shows an empty PR list with an informational message
 
 **Note**: In-platform PR diff review with hunk-level navigation is deferred to phase 2 (see `cpt-cyberwiki-fr-pr-diff-review`). For v1, all PR review actions are performed in the VCS provider's native interface.
+
+---
+
+### Tag and Link Documents Across Repositories
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-usecase-tag-link-docs`
+
+**Actor**: `cpt-cyberwiki-actor-editor`
+
+**Preconditions**:
+- Editor is authenticated and has Editor role
+- Multiple documents exist across different repositories
+- Documents have been indexed and assigned unique IDs
+
+**Main Flow**:
+1. Editor opens a document in Repository A (e.g., architecture decision record)
+2. System displays the document with auto-generated tags based on content analysis (e.g., "architecture", "security", "authentication", "api")
+3. Editor adds custom tags to categorize the document (e.g., "phase-1", "reviewed", "critical")
+4. System provides tag autocomplete suggestions based on existing tags in the platform
+5. Editor wants to reference a related document in Repository B (e.g., API specification)
+6. Editor clicks "Insert Link" and searches for the target document by title or tags
+7. System shows search results with document titles, repositories, and preview snippets
+8. Editor selects the target document; system inserts link using document ID: `[[doc:abc-123-def|API Specification]]`
+9. System validates the link and shows a preview tooltip with document metadata
+10. Editor saves the document; system validates all links and warns about any broken references
+11. System updates backlinks: the referenced document in Repository B now shows this document in its "Referenced By" section
+
+**Postconditions**:
+- Document has both auto-generated and custom tags visible in metadata view
+- Cross-repository link is established using stable document ID
+- Link survives if either document is renamed or moved within its repository
+- Both documents show bidirectional reference relationship
+
+**Alternative Flows**:
+- **Tag already exists**: System suggests existing tag with same name to maintain consistency
+- **Broken link**: If referenced document is deleted or becomes inaccessible, system marks link as broken with visual indicator
+- **Link to external system**: Editor can also insert links to JIRA (`jira:KEY-123`), GitHub issues (`github:org/repo#123`), or other systems using URI schemes
+
+---
+
+### Discover Documents by Tags
+
+- [ ] `p1` - **ID**: `cpt-cyberwiki-usecase-discover-by-tags`
+
+**Actor**: `cpt-cyberwiki-actor-viewer`
+
+**Preconditions**:
+- User is authenticated
+- Multiple documents exist with various tags (auto-generated and custom)
+
+**Main Flow**:
+1. User opens the search interface
+2. User clicks on the "Tag Cloud" view to see all available tags with frequency indicators
+3. User clicks on a tag (e.g., "security") to see all documents with that tag
+4. System displays filtered results showing documents from all accessible repositories
+5. User adds additional tag filters (e.g., "security" AND "api") to narrow results
+6. System applies AND logic and shows only documents matching all selected tags
+7. User combines tag filter with text search (e.g., tag:"security" + text:"authentication")
+8. System returns documents that match both tag and text criteria
+9. User clicks on a document to view it; document shows all its tags (auto-generated in one color, custom in another)
+10. User clicks on another tag in the document view to find related documents
+
+**Postconditions**:
+- User has discovered relevant documents using tag-based navigation
+- User understands document topics through visible tags
+- User can navigate between related documents using tag links
+
+**Alternative Flows**:
+- **No results**: System shows "No documents found with selected tags" message with suggestions for related tags
+- **Tag suggestions**: System suggests related tags based on co-occurrence patterns (e.g., documents tagged "security" are often also tagged "compliance")
 
 ---
 

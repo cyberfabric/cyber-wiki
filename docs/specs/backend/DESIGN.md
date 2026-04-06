@@ -568,16 +568,53 @@ class Space(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Document(models.Model):
+    """
+    Represents a document in the wiki system.
+    
+    Traceability:
+    - @cpt-cyberwiki-fr-document-unique-id: unique_id field provides stable document identifier
+    - @cpt-cyberwiki-fr-auto-tags: Related via DocumentTag model for auto-generated tags
+    - @cpt-cyberwiki-fr-custom-tags: Related via DocumentTag model for custom tags
+    - @cpt-cyberwiki-fr-cross-repo-linking: unique_id enables cross-repo document references
+    """
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
+    
+    # Unique document identifier (stable across renames/moves)
+    # @cpt-cyberwiki-fr-document-unique-id
+    unique_id = models.CharField(max_length=64, unique=True, db_index=True)
+    
     title = models.CharField(max_length=500)
     path = models.CharField(max_length=1000)
     content = models.TextField(blank=True)
+    content_hash = models.CharField(max_length=64, blank=True)  # SHA256 of content for change detection
     doc_type = models.CharField(max_length=20)  # 'markdown', 'code'
     git_path = models.CharField(max_length=1000, blank=True)
     git_branch = models.CharField(max_length=255, default='main')
+    
+    # Repository identification for cross-repo linking
+    repository_id = models.CharField(max_length=255, db_index=True)  # "projectkey_reposlug"
+    git_provider = models.CharField(max_length=50)  # 'github', 'bitbucket_server'
+    
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # Metadata
+    last_indexed_at = models.DateTimeField(null=True)  # For tag generation
+    
+    @staticmethod
+    def generate_unique_id() -> str:
+        """Generate a unique document ID using nanoid."""
+        import secrets
+        import string
+        alphabet = string.ascii_lowercase + string.digits
+        return ''.join(secrets.choice(alphabet) for _ in range(21))
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['repository_id', 'git_path']),
+            models.Index(fields=['space', 'path']),
+        ]
 
 class GitSyncConfig(models.Model):
     space = models.OneToOneField(Space, on_delete=models.CASCADE)
@@ -587,6 +624,119 @@ class GitSyncConfig(models.Model):
     direction = models.CharField(max_length=20)  # 'git_to_wiki', 'wiki_to_git', 'bidirectional'
     status = models.CharField(max_length=20)  # 'synced', 'conflict', 'pending', 'error'
     last_sync_at = models.DateTimeField(null=True)
+```
+
+**Tag, DocumentTag:**
+```python
+class Tag(models.Model):
+    """
+    Represents a tag that can be applied to documents.
+    
+    Traceability:
+    - @cpt-cyberwiki-fr-auto-tags: Auto-generated tags from TF-IDF analysis
+    - @cpt-cyberwiki-fr-custom-tags: User-created custom tags
+    - @cpt-cyberwiki-fr-tag-search: Tags enable search and filtering
+    """
+    class TagType(models.TextChoices):
+        AUTO = 'auto'      # Auto-generated from content analysis
+        CUSTOM = 'custom'  # User-created tag
+    
+    name = models.CharField(max_length=50, unique=True, db_index=True)
+    normalized_name = models.CharField(max_length=50, db_index=True)  # Lowercase, stemmed
+    tag_type = models.CharField(max_length=10, choices=TagType.choices, default=TagType.CUSTOM)
+    
+    # Statistics for tag cloud visualization
+    usage_count = models.PositiveIntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['normalized_name']),
+            models.Index(fields=['tag_type', 'usage_count']),
+        ]
+
+class DocumentTag(models.Model):
+    """
+    Many-to-many relationship between Documents and Tags with additional metadata.
+    
+    Traceability:
+    - @cpt-cyberwiki-fr-auto-tags: relevance_score for auto-generated tags
+    - @cpt-cyberwiki-fr-custom-tags: created_by for user-created tags
+    - @cpt-cyberwiki-fr-tag-search: Enables tag-based document filtering
+    """
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='document_tags')
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name='document_tags')
+    
+    # Auto-generated tag metadata
+    relevance_score = models.FloatField(null=True)  # TF-IDF score for auto-generated tags
+    
+    # Custom tag metadata
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)  # For custom tags
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = [['document', 'tag']]
+        indexes = [
+            models.Index(fields=['document', 'tag']),
+            models.Index(fields=['tag', 'relevance_score']),
+        ]
+```
+
+**DocumentLink:**
+```python
+class DocumentLink(models.Model):
+    """
+    Represents a link from one document to another, supporting cross-repository linking.
+    
+    Traceability:
+    - @cpt-cyberwiki-fr-cross-repo-linking: Enables linking between documents across repositories
+    - @cpt-cyberwiki-fr-document-unique-id: Uses unique_id for stable references
+    """
+    class LinkType(models.TextChoices):
+        INTERNAL = 'internal'  # Link to another document in the system
+        EXTERNAL = 'external'  # Link to external system (JIRA, GitHub, etc.)
+    
+    # Source document
+    source_document = models.ForeignKey(
+        Document, 
+        on_delete=models.CASCADE, 
+        related_name='outgoing_links'
+    )
+    
+    # Target document (for internal links)
+    target_document = models.ForeignKey(
+        Document, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='incoming_links'
+    )
+    target_document_id = models.CharField(max_length=64, db_index=True)  # unique_id of target
+    
+    # External link (for external systems)
+    external_uri = models.CharField(max_length=500, null=True)  # e.g., "jira:KEY-123"
+    
+    link_type = models.CharField(max_length=10, choices=LinkType.choices)
+    link_text = models.CharField(max_length=500, blank=True)  # Display text for the link
+    
+    # Link validation
+    is_valid = models.BooleanField(default=True)  # False if target is missing/inaccessible
+    last_validated_at = models.DateTimeField(null=True)
+    
+    # Position in source document
+    line_number = models.PositiveIntegerField(null=True)  # Line where link appears
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['source_document', 'link_type']),
+            models.Index(fields=['target_document_id', 'is_valid']),
+            models.Index(fields=['target_document']),  # For backlinks
+        ]
 ```
 
 ### 4.3 Git Provider Models
@@ -684,12 +834,22 @@ Does not handle HTTP requests or database persistence.
 
 **Endpoints Overview**:
 
-| Method | Path | Description | Stability |
-|--------|------|-------------|-----------|
-| `GET/POST` | `/api/auth/*` | Login, logout, SSO | stable |
-| `GET/PUT` | `/api/user_management/v1/*` | User preferences | stable |
-| `GET` | `/api/wiki/repositories/{id}/tree/` | Repository file/document tree | stable |
-| `GET/POST` | `/api/enrichments/` | Fetch and interact with enrichments | stable |
+| Method | Path | Description | Stability | Traceability |
+|--------|------|-------------|-----------|--------------|
+| `GET/POST` | `/api/auth/*` | Login, logout, SSO | stable | @cpt-cyberwiki-fr-authentication |
+| `GET/PUT` | `/api/user_management/v1/*` | User preferences | stable | - |
+| `GET` | `/api/wiki/repositories/{id}/tree/` | Repository file/document tree | stable | @cpt-cyberwiki-fr-file-tree-navigation |
+| `GET/POST` | `/api/enrichments/` | Fetch and interact with enrichments | stable | - |
+| `GET` | `/api/wiki/documents/{unique_id}/` | Get document by unique ID | stable | @cpt-cyberwiki-fr-document-unique-id |
+| `GET` | `/api/wiki/documents/{unique_id}/tags/` | Get document tags | stable | @cpt-cyberwiki-fr-auto-tags, @cpt-cyberwiki-fr-custom-tags |
+| `POST` | `/api/wiki/documents/{unique_id}/tags/` | Add custom tag to document | stable | @cpt-cyberwiki-fr-custom-tags |
+| `DELETE` | `/api/wiki/documents/{unique_id}/tags/{tag_id}/` | Remove tag from document | stable | @cpt-cyberwiki-fr-custom-tags |
+| `GET` | `/api/wiki/tags/` | List all tags with usage counts | stable | @cpt-cyberwiki-fr-tag-search |
+| `GET` | `/api/wiki/tags/autocomplete/` | Tag autocomplete suggestions | stable | @cpt-cyberwiki-fr-custom-tags |
+| `GET` | `/api/wiki/documents/{unique_id}/links/` | Get document links (outgoing) | stable | @cpt-cyberwiki-fr-cross-repo-linking |
+| `GET` | `/api/wiki/documents/{unique_id}/backlinks/` | Get backlinks (incoming) | stable | @cpt-cyberwiki-fr-cross-repo-linking |
+| `POST` | `/api/wiki/documents/{unique_id}/links/validate/` | Validate all links in document | stable | @cpt-cyberwiki-fr-cross-repo-linking |
+| `GET` | `/api/wiki/search/` | Search documents by text and tags | stable | @cpt-cyberwiki-fr-fulltext-search, @cpt-cyberwiki-fr-tag-search |
 
 ### 5.4 Internal Dependencies
 
@@ -803,6 +963,59 @@ This section shows how each PRD use case flows through the backend architecture.
 **Components**: `git_provider.providers.github/bitbucket_server`, `enrichment_provider.pr_enrichment`
 
 **Requirements**: `cpt-cyberwiki-fr-pr-listing`, `cpt-cyberwiki-fr-pr-diff-review`, `cpt-cyberwiki-fr-vcs-backend`
+
+#### 6.1.6 Use Case: Tag and Link Documents Across Repositories
+**ID**: `cpt-cyberwiki-usecase-tag-link-docs`
+
+**Backend Flow**:
+1. On document indexing: Generate auto-tags using TF-IDF algorithm
+   - Extract text content, remove stop words
+   - Calculate term frequency and inverse document frequency
+   - Select top 5-15 terms by relevance score
+   - Create `Tag` records with `tag_type='auto'`
+   - Create `DocumentTag` records with `relevance_score`
+2. User adds custom tag: `POST /api/wiki/documents/{unique_id}/tags/`
+   - Validate tag format (alphanumeric, max 50 chars)
+   - Check if tag exists, create if new
+   - Create `DocumentTag` with `created_by=user`
+   - Increment `Tag.usage_count`
+3. User inserts cross-repo link: Parse `[[doc:target_id|Display Text]]` syntax
+   - Resolve `target_id` to `Document` record
+   - Create `DocumentLink` with `link_type='internal'`
+   - Validate link (check target exists and is accessible)
+   - Set `is_valid` based on validation result
+4. On document save: Validate all links
+   - Parse document content for link syntax
+   - Check each target document exists
+   - Update `DocumentLink.is_valid` and `last_validated_at`
+   - Return warnings for broken links
+
+**Components**: `wiki.views`, `wiki.models.Document`, `wiki.models.Tag`, `wiki.models.DocumentTag`, `wiki.models.DocumentLink`, `wiki.tag_generator` (new), `wiki.link_parser` (new)
+
+**Requirements**: `cpt-cyberwiki-fr-document-unique-id`, `cpt-cyberwiki-fr-auto-tags`, `cpt-cyberwiki-fr-custom-tags`, `cpt-cyberwiki-fr-cross-repo-linking`
+
+#### 6.1.7 Use Case: Discover Documents by Tags
+**ID**: `cpt-cyberwiki-usecase-discover-by-tags`
+
+**Backend Flow**:
+1. User requests tag cloud: `GET /api/wiki/tags/`
+   - Query `Tag` model ordered by `usage_count DESC`
+   - Return tags with counts for visualization
+2. User filters by tag: `GET /api/wiki/search/?tags=security,api`
+   - Parse tag filter (AND/OR logic)
+   - Query `DocumentTag` for documents matching all/any tags
+   - Join with `Document` to get full document data
+3. User combines tag + text search: `GET /api/wiki/search/?q=authentication&tags=security`
+   - Perform full-text search on document content
+   - Filter results by tag membership
+   - Return intersection of text and tag matches
+4. User clicks tag in document view: Navigate to tag filter view
+   - Show all documents with that tag
+   - Display related tags (co-occurrence analysis)
+
+**Components**: `wiki.views`, `wiki.models.Tag`, `wiki.models.DocumentTag`, `wiki.search` (new)
+
+**Requirements**: `cpt-cyberwiki-fr-tag-search`, `cpt-cyberwiki-fr-fulltext-search`
 
 ---
 
